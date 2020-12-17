@@ -5,4 +5,5 @@ edition = "2018"
 repository = "https://github.com/chuck-flowers/worm"
 
 [dependencies]
+metafor = "^0.1.0"
 worm-macros = { path = "../worm-macros" }
