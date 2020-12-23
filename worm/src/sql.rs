@@ -1,3 +1,5 @@
+//! Types that represent raw SQL.
+
 mod fields;
 
 /// A raw SQL value.
