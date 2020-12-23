@@ -13,6 +13,18 @@ where
     row_iter: Box<dyn Iterator<Item = SqlRow>>,
 }
 
+impl<T> QueryResults<T>
+where
+    T: SqlResult,
+{
+    pub(crate) fn new(row_iter: Box<dyn Iterator<Item = SqlRow>>) -> Self {
+        Self {
+            __: PhantomData {},
+            row_iter,
+        }
+    }
+}
+
 impl<T> Iterator for QueryResults<T>
 where
     T: SqlResult,
