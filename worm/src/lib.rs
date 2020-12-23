@@ -4,6 +4,7 @@
 #![warn(missing_docs)]
 
 pub mod errors;
+pub mod executors;
 pub mod results;
 pub mod sql;
 
