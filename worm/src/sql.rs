@@ -28,3 +28,11 @@ pub trait SqlResult {
     where
         Self: Sized;
 }
+
+impl SqlResult for () {
+    fn from_row(_: SqlRow) -> Self
+    where
+        Self: Sized,
+    {
+    }
+}

@@ -10,6 +10,7 @@ pub mod results;
 pub mod sql;
 
 use self::sql::SqlResult;
+pub use worm_macros::Script;
 
 /// A type that represents a templated script.
 pub trait Script {
