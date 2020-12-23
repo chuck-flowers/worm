@@ -22,5 +22,7 @@ pub struct SqlRow(Vec<SqlValue>);
 /// A type that can be returned by a SQL query.
 pub trait SqlResult {
     /// Converts a SQL row into an instance of the type.
-    fn from_row(row: SqlRow);
+    fn from_row(row: SqlRow) -> Self
+    where
+        Self: Sized;
 }
