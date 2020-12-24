@@ -1,11 +1,6 @@
+use crate::errors::FieldConversionError;
 use crate::sql::SqlValue;
 use metafor::metafor;
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum FieldConversionError {
-    IncorrectType,
-    ValueOutOfBounds,
-}
 
 /// A type which can be converted from/to a raw SQL literal.
 pub trait RecordField {
