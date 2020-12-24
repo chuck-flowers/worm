@@ -1,2 +1,2 @@
 [workspace]
-members = ["worm", "worm-macros"]
+members = ["worm", "worm-macros", "worm-postgres"]
