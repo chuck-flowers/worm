@@ -23,7 +23,7 @@ impl Connection {
     }
 
     /// Executes a provided script.
-    pub fn execute<S>(&self, script: S) -> Result<QueryResults<S::Output>, WormError>
+    pub fn execute<S>(&mut self, script: S) -> Result<QueryResults<S::Output>, WormError>
     where
         S: Script,
     {

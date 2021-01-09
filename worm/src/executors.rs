@@ -10,5 +10,5 @@ pub type ResultIter = Box<dyn Iterator<Item = Result<SqlRow, RowConversionError>
 /// A type which can execute SQL.
 pub trait SqlExecutor {
     /// Executes the supplied script
-    fn execute_sql(&self, sql: &str) -> Result<ResultIter, SqlExecutionError>;
+    fn execute_sql(&mut self, sql: &str) -> Result<ResultIter, SqlExecutionError>;
 }
