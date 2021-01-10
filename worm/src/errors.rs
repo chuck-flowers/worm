@@ -146,6 +146,11 @@ pub enum RawRowConversionError {
         /// The name of the type which is not supported.
         type_name: Option<String>,
     },
+    /// Another unspecified error that occurred.
+    Other {
+        /// The error that occurred.
+        err: Box<dyn Error>,
+    },
 }
 
 impl Display for RawRowConversionError {
@@ -168,6 +173,9 @@ impl Display for RawRowConversionError {
                 "Unable to convert the value of column '{}' because its data type is unsupported.",
                 column_name
             ),
+            RawRowConversionError::Other { err } => {
+                write!(f, "An error occured while converting the DBMS-specific SQL representation: {}", err)
+            }
         }
     }
 }
