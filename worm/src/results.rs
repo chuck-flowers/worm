@@ -6,19 +6,19 @@ use crate::sql::SqlResult;
 use core::marker::PhantomData;
 
 /// The results of a query.
-pub struct QueryResults<T>
+pub struct QueryResults<'a, T>
 where
     T: SqlResult,
 {
     __: PhantomData<T>,
-    row_iter: ResultIter,
+    row_iter: ResultIter<'a>,
 }
 
-impl<T> QueryResults<T>
+impl<'a, T> QueryResults<'a, T>
 where
     T: SqlResult,
 {
-    pub(crate) fn new(row_iter: ResultIter) -> Self {
+    pub(crate) fn new(row_iter: ResultIter<'a>) -> Self {
         Self {
             __: PhantomData {},
             row_iter,
@@ -26,7 +26,7 @@ where
     }
 }
 
-impl<T> Iterator for QueryResults<T>
+impl<'a, T> Iterator for QueryResults<'a, T>
 where
     T: SqlResult,
 {
