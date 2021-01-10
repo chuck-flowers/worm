@@ -1,5 +1,7 @@
 //! Types that represent raw SQL.
 
+use std::iter::FromIterator;
+
 mod fields;
 
 /// A raw SQL value.
@@ -20,6 +22,12 @@ pub enum SqlValue {
 
 /// A raw SQL row.
 pub struct SqlRow(Vec<SqlValue>);
+
+impl FromIterator<SqlValue> for SqlRow {
+    fn from_iter<T: IntoIterator<Item = SqlValue>>(iter: T) -> Self {
+        Self(Vec::from_iter(iter))
+    }
+}
 
 /// A type that can be returned by a SQL query.
 pub trait SqlResult {
