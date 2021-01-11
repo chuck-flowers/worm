@@ -60,8 +60,7 @@ fn impl_derive_script_struct(
         impl ::worm::Script for #type_name {
             type Output = ();
             fn compile(self) -> ::std::string::String {
-                let sql = #sql_template;
-                ::core::todo!()
+                #sql_template
             }
         }
     })
@@ -113,7 +112,7 @@ fn build_sql(
             let self_ident = Ident::new("self", ident.span());
             let field_ident = ident.clone();
             param_values.push(quote! {
-                #self_ident . #field_ident
+                ::worm::sql::RecordField::into_sql(#self_ident.#field_ident)
             });
         } else {
             let message = format!(
@@ -125,6 +124,8 @@ fn build_sql(
             return Err(error);
         }
     }
+
+    sql_template.push_str(&script[literal_start..]);
 
     Ok(quote! {
         format!(#sql_template, #(#param_values),*)
