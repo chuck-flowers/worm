@@ -1,8 +1,12 @@
 //! Types that represent raw SQL.
 
-use std::iter::FromIterator;
-
 mod fields;
+
+pub use self::fields::RecordField;
+use core::fmt::Display;
+use core::fmt::Formatter;
+use core::fmt::Result as FmtResult;
+use core::iter::FromIterator;
 
 /// A raw SQL value.
 pub enum SqlValue {
@@ -18,6 +22,19 @@ pub enum SqlValue {
     SignedInteger(i128),
     /// A whole number that cannot be negative.
     UnsignedInteger(u128),
+}
+
+impl Display for SqlValue {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        match self {
+            SqlValue::Boolean(b) => b.fmt(f),
+            SqlValue::Float(float) => float.fmt(f),
+            SqlValue::Null => f.write_str("NULL"),
+            SqlValue::String(string) => write!(f, "'{}'", string),
+            SqlValue::SignedInteger(integer) => integer.fmt(f),
+            SqlValue::UnsignedInteger(integer) => integer.fmt(f),
+        }
+    }
 }
 
 /// A raw SQL row.
