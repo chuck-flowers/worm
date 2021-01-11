@@ -1,1 +1,1 @@
-INSERT INTO User (name) VALUES ($name);
+INSERT INTO SystemUser (name) VALUES ($name);
