@@ -9,14 +9,14 @@ use crate::Script;
 /// SQL types and Rust types.
 pub struct Connection {
     /// The executor which connects to the database.
-    executor: Box<dyn SqlExecutor>,
+    executor: Box<dyn SqlExecutor + Send>,
 }
 
 impl Connection {
     /// Creates a new connection with the provided executor.
     pub fn new<E>(executor: E) -> Self
     where
-        E: SqlExecutor + 'static,
+        E: SqlExecutor + Send + 'static,
     {
         let executor = Box::new(executor);
         Self { executor }
