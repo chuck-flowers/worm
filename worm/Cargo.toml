@@ -4,7 +4,10 @@ version = "0.0.0"
 edition = "2018"
 repository = "https://github.com/chuck-flowers/worm"
 
+[features]
+pooling = ["r2d2"]
+
 [dependencies]
 metafor = "^0.1.0"
-r2d2 = "^0.8.9"
+r2d2 = { version = "^0.8.9", optional = true }
 worm-macros = { path = "../worm-macros" }
