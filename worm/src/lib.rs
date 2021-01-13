@@ -6,6 +6,7 @@
 pub mod connections;
 pub mod errors;
 pub mod executors;
+pub mod pooling;
 pub mod results;
 pub mod sql;
 
