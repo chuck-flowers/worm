@@ -1,4 +1,5 @@
 use std::error::Error;
+use worm::executors::SqlExecutor;
 use worm::Script;
 use worm_postgres::PostgresExecutor;
 

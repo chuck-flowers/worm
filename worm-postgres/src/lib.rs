@@ -11,6 +11,7 @@ use postgres::Error as PostgresError;
 use postgres::NoTls;
 use postgres::Row;
 use std::error::Error;
+use worm::errors::ConnectionError;
 use worm::errors::RawRowConversionError;
 use worm::errors::RowConversionError;
 use worm::errors::SqlExecutionError;
@@ -46,15 +47,17 @@ impl<'a> FromSql<'a> for PgWormSqlValue {
 /// An worm executor for postgres
 pub struct PostgresExecutor(Client);
 
-impl PostgresExecutor {
-    /// Creates a new executor that can execute SQL in a specified DBMS.
-    pub fn new(conn_string: &str) -> Result<Self, PostgresError> {
-        let client = Client::connect(conn_string, NoTls)?;
-        Ok(Self(client))
-    }
-}
-
 impl SqlExecutor for PostgresExecutor {
+    fn connect(connection_string: &str) -> Result<Self, ConnectionError>
+    where
+        Self: Sized,
+    {
+        match Client::connect(connection_string, NoTls) {
+            Ok(client) => Ok(Self(client)),
+            Err(_) => Err(ConnectionError::new(connection_string.to_owned())),
+        }
+    }
+
     fn execute_sql<'a>(&'a mut self, sql: &str) -> Result<ResultIter<'a>, SqlExecutionError> {
         let client = &mut self.0;
         let pg_row_iter = match client.query_raw(sql, core::iter::empty()) {
