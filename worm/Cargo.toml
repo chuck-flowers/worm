@@ -6,4 +6,5 @@ repository = "https://github.com/chuck-flowers/worm"
 
 [dependencies]
 metafor = "^0.1.0"
+r2d2 = "^0.8.9"
 worm-macros = { path = "../worm-macros" }
