@@ -17,6 +17,7 @@ use worm::errors::RowConversionError;
 use worm::errors::SqlExecutionError;
 use worm::executors::ResultIter;
 use worm::executors::SqlExecutor;
+use worm::sql::RecordField;
 use worm::sql::SqlRow;
 use worm::sql::SqlValue;
 
@@ -24,23 +25,47 @@ struct PgWormSqlValue(SqlValue);
 
 impl<'a> FromSql<'a> for PgWormSqlValue {
     fn from_sql(ty: &Type, raw: &'a [u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
-        match ty {
-            &Type::INT2 | &Type::INT4 | &Type::INT8 => {
-                let val = i64::from_sql(ty, raw)?;
-                Ok(PgWormSqlValue(SqlValue::SignedInteger(val as i128)))
-            }
-            &Type::TEXT => {
-                let val = String::from_sql(ty, raw)?;
-                Ok(PgWormSqlValue(SqlValue::String(val)))
-            }
-            _ => todo!("Unhandled postgres => worm conversion"),
+        fn make_mapper<'a, T>(
+            ty: &Type,
+            raw: &'a [u8],
+        ) -> Result<PgWormSqlValue, Box<dyn Error + Sync + Send>>
+        where
+            T: RecordField + FromSql<'a>,
+        {
+            <T as FromSql<'a>>::from_sql(ty, raw).map(|t| PgWormSqlValue(t.into_sql()))
         }
+
+        let results = [
+            make_mapper::<bool>,
+            make_mapper::<f32>,
+            make_mapper::<f64>,
+            make_mapper::<String>,
+            make_mapper::<i8>,
+            make_mapper::<i16>,
+            make_mapper::<i32>,
+            make_mapper::<i64>,
+            make_mapper::<u32>,
+        ]
+        .iter()
+        .map(|f| f(ty, raw));
+
+        Ok(results.filter_map(Result::ok).next().unwrap())
     }
 
     fn accepts(ty: &Type) -> bool {
-        [i16::accepts, i32::accepts, i64::accepts, String::accepts]
-            .iter()
-            .any(|f| f(ty))
+        [
+            bool::accepts,
+            f32::accepts,
+            f64::accepts,
+            String::accepts,
+            i8::accepts,
+            i16::accepts,
+            i32::accepts,
+            i64::accepts,
+            u32::accepts,
+        ]
+        .iter()
+        .any(|f| f(ty))
     }
 }
 
