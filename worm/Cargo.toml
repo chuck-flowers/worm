@@ -6,8 +6,10 @@ repository = "https://github.com/chuck-flowers/worm"
 
 [features]
 pooling = ["r2d2"]
+rocket-support = ["pooling", "rocket_contrib"]
 
 [dependencies]
 metafor = "^0.1.0"
 r2d2 = { version = "^0.8.9", optional = true }
+rocket_contrib = { version = "^0.4.6", optional = true, features = ["databases"] }
 worm-macros = { path = "../worm-macros" }
