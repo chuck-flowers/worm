@@ -16,6 +16,16 @@ impl FromIterator<SqlValue> for SqlRow {
     }
 }
 
+impl IntoIterator for SqlRow {
+    type Item = SqlValue;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 /// A type that can be returned by a SQL query.
 pub trait SqlResult {
     /// Converts a SQL row into an instance of the type.

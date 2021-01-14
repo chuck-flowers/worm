@@ -16,7 +16,7 @@ use syn::DataStruct;
 use syn::DeriveInput;
 use syn::Field;
 
-#[proc_macro_derive(Script)]
+#[proc_macro_derive(Script, attributes(worm))]
 pub fn derive_script(tagged: TokenStream) -> TokenStream {
     let tagged = parse_macro_input!(tagged as DeriveInput);
     impl_derive_script(tagged).into()
@@ -42,10 +42,11 @@ fn impl_derive_script_struct(
     tagged_struct: &DataStruct,
 ) -> Result<TokenStream2, syn::Error> {
     let attr = get_helper_attr(&type_name, attrs.iter())?;
-    let script_path: PathBuf = attr.into();
+    let return_type = attr.result();
+    let script_path: &PathBuf = attr.path();
 
     // Load the script from the file system.
-    let script = std::fs::read_to_string(&script_path).map_err(|io_err| {
+    let script = std::fs::read_to_string(script_path).map_err(|io_err| {
         let message = format!(
             "Unable to open the script file at '{}':\n{}",
             script_path.to_string_lossy(),
@@ -58,7 +59,7 @@ fn impl_derive_script_struct(
 
     Ok(quote! {
         impl ::worm::Script for #type_name {
-            type Output = ();
+            type Output = #return_type;
             fn compile(self) -> ::std::string::String {
                 #sql_template
             }
