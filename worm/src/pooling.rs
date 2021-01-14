@@ -28,6 +28,19 @@ where
     __: PhantomData<E>,
 }
 
+impl<E> ConnectionManager<E>
+where
+    E: SqlExecutor + Send,
+{
+    /// Constructs a new connection manager using the provided connection string.
+    pub fn new(connection_string: String) -> Self {
+        Self {
+            connection_string,
+            __: PhantomData {},
+        }
+    }
+}
+
 unsafe impl<E> Sync for ConnectionManager<E> where E: SqlExecutor + Send {}
 
 impl<E> ManageConnection for ConnectionManager<E>
