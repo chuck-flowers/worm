@@ -1,6 +1,5 @@
 use crate::errors::FieldConversionError;
 use crate::sql::SqlValue;
-use metafor::metafor;
 
 /// A type which can be converted from/to a raw SQL literal.
 pub trait RecordField {
@@ -13,143 +12,254 @@ pub trait RecordField {
     fn into_sql(self) -> SqlValue;
 }
 
-#[metafor(
-    variant = [
-        { ty: bool, name: Boolean },
-        { ty: f64, name: Float },
-        { ty: String, name: String },
-        { ty: i128, name: SignedInteger },
-        { ty: u128, name: UnsignedInteger }
-    ]
-)]
-impl RecordField for __variant__ty__ {
+#[cfg(feature = "sql-value-bool")]
+impl RecordField for bool {
     fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
     where
         Self: Sized,
     {
-        if let SqlValue::__variant__name__(value) = sql_value {
-            Ok(value)
+        if let SqlValue::Boolean(b) = sql_value {
+            Ok(b)
         } else {
             Err(FieldConversionError::IncorrectType)
         }
     }
 
     fn into_sql(self) -> SqlValue {
-        SqlValue::__variant__name__(self)
+        SqlValue::Boolean(self)
     }
 }
 
-#[metafor(
-    u_type = [
-        u8,
-        u16,
-        u32,
-        u64
-    ]
-)]
-impl RecordField for __u_type__ {
+#[cfg(feature = "sql-value-f32")]
+impl RecordField for f32 {
     fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
     where
         Self: Sized,
     {
-        match sql_value {
-            SqlValue::UnsignedInteger(u) => {
-                if ((__u_type__::MIN as u128)..=(__u_type__::MAX as u128)).contains(&u) {
-                    Ok(u as __u_type__)
-                } else {
-                    Err(FieldConversionError::ValueOutOfBounds)
-                }
-            }
-            SqlValue::SignedInteger(i) => {
-                if i >= 0 && (__u_type__::MIN..=__u_type__::MAX).contains(&(i as __u_type__)) {
-                    Ok(i as __u_type__)
-                } else {
-                    Err(FieldConversionError::ValueOutOfBounds)
-                }
-            }
-            _ => Err(FieldConversionError::IncorrectType),
+        if let SqlValue::Float32(f) = sql_value {
+            Ok(f)
+        } else {
+            Err(FieldConversionError::IncorrectType)
         }
     }
 
     fn into_sql(self) -> SqlValue {
-        SqlValue::UnsignedInteger(self as u128)
+        SqlValue::Float32(self)
     }
 }
 
-#[metafor(
-    i_type = [
-        i8,
-        i16,
-        i32,
-        i64
-    ]
-)]
-impl RecordField for __i_type__ {
+#[cfg(feature = "sql-value-f64")]
+impl RecordField for f64 {
     fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
     where
         Self: Sized,
     {
-        match sql_value {
-            SqlValue::SignedInteger(i) => {
-                if ((__i_type__::MIN as i128)..=(__i_type__::MAX as i128)).contains(&i) {
-                    Ok(i as __i_type__)
-                } else {
-                    Err(FieldConversionError::ValueOutOfBounds)
-                }
-            }
-            SqlValue::UnsignedInteger(u) => {
-                if (0..=(__i_type__::MAX as u128)).contains(&u) {
-                    Ok(u as __i_type__)
-                } else {
-                    Err(FieldConversionError::ValueOutOfBounds)
-                }
-            }
-            _ => Err(FieldConversionError::IncorrectType),
+        if let SqlValue::Float64(f) = sql_value {
+            Ok(f)
+        } else {
+            Err(FieldConversionError::IncorrectType)
         }
     }
 
     fn into_sql(self) -> SqlValue {
-        SqlValue::SignedInteger(self as i128)
+        SqlValue::Float64(self)
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn signed_typical_from_sql() {
-        let result = i8::from_sql(SqlValue::SignedInteger(127));
-        assert_eq!(result, Ok(127))
+#[cfg(feature = "sql-value-string")]
+impl RecordField for String {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::String(string) = sql_value {
+            Ok(string)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
     }
 
-    #[test]
-    fn signed_atypical_from_sql() {
-        let result = i8::from_sql(SqlValue::UnsignedInteger(127));
-        assert_eq!(result, Ok(127))
+    fn into_sql(self) -> SqlValue {
+        SqlValue::String(self)
+    }
+}
+
+#[cfg(feature = "sql-value-i8")]
+impl RecordField for i8 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Signed8(i) = sql_value {
+            Ok(i)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
     }
 
-    #[test]
-    fn signed_out_of_bounds_from_sql() {
-        let result = i8::from_sql(SqlValue::SignedInteger(128));
-        assert_eq!(result, Err(FieldConversionError::ValueOutOfBounds))
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Signed8(self)
+    }
+}
+
+#[cfg(feature = "sql-value-i16")]
+impl RecordField for i16 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Signed16(i) = sql_value {
+            Ok(i)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
     }
 
-    #[test]
-    fn unsigned_typical_from_sql() {
-        let result = u8::from_sql(SqlValue::UnsignedInteger(255));
-        assert_eq!(result, Ok(255))
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Signed16(self)
+    }
+}
+
+#[cfg(feature = "sql-value-i32")]
+impl RecordField for i32 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Signed32(i) = sql_value {
+            Ok(i)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
     }
 
-    #[test]
-    fn unsigned_atypical_from_sql() {
-        let result = u8::from_sql(SqlValue::SignedInteger(255));
-        assert_eq!(result, Ok(255))
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Signed32(self)
+    }
+}
+
+#[cfg(feature = "sql-value-i64")]
+impl RecordField for i64 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Signed64(i) = sql_value {
+            Ok(i)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
     }
 
-    #[test]
-    fn unsigned_out_of_bounds_from_sql() {
-        let result = u8::from_sql(SqlValue::UnsignedInteger(256));
-        assert_eq!(result, Err(FieldConversionError::ValueOutOfBounds))
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Signed64(self)
+    }
+}
+
+#[cfg(feature = "sql-value-i128")]
+impl RecordField for i128 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Signed128(i) = sql_value {
+            Ok(i)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
+    }
+
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Signed128(self)
+    }
+}
+
+#[cfg(feature = "sql-value-u8")]
+impl RecordField for u8 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Unsigned8(u) = sql_value {
+            Ok(u)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
+    }
+
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Unsigned8(self)
+    }
+}
+
+#[cfg(feature = "sql-value-u16")]
+impl RecordField for u16 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Unsigned16(u) = sql_value {
+            Ok(u)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
+    }
+
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Unsigned16(self)
+    }
+}
+
+#[cfg(feature = "sql-value-u32")]
+impl RecordField for u32 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Unsigned32(u) = sql_value {
+            Ok(u)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
+    }
+
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Unsigned32(self)
+    }
+}
+
+#[cfg(feature = "sql-value-u64")]
+impl RecordField for u64 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Unsigned64(u) = sql_value {
+            Ok(u)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
+    }
+
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Unsigned64(self)
+    }
+}
+
+#[cfg(feature = "sql-value-u128")]
+impl RecordField for u128 {
+    fn from_sql(sql_value: SqlValue) -> Result<Self, FieldConversionError>
+    where
+        Self: Sized,
+    {
+        if let SqlValue::Unsigned128(u) = sql_value {
+            Ok(u)
+        } else {
+            Err(FieldConversionError::IncorrectType)
+        }
+    }
+
+    fn into_sql(self) -> SqlValue {
+        SqlValue::Unsigned128(self)
     }
 }

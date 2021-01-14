@@ -8,4 +8,17 @@ edition = "2018"
 
 [dependencies]
 postgres = "^0.18.1"
-worm = { path = '../worm' }
+
+[dependencies.worm]
+path = "../worm"
+features = [
+    "sql-value-bool",
+    "sql-value-f32",
+    "sql-value-f64",
+    "sql-value-string",
+    "sql-value-i8",
+    "sql-value-i16",
+    "sql-value-i32",
+    "sql-value-i64",
+    "sql-value-u32",
+]

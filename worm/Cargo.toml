@@ -7,9 +7,22 @@ repository = "https://github.com/chuck-flowers/worm"
 [features]
 pooling = ["r2d2"]
 rocket-support = ["pooling", "rocket_contrib"]
+sql-value-bool = []
+sql-value-i8 = []
+sql-value-i16 = []
+sql-value-i32 = []
+sql-value-i64 = []
+sql-value-i128 = []
+sql-value-u8 = []
+sql-value-u16 = []
+sql-value-u32 = []
+sql-value-u64 = []
+sql-value-u128 = []
+sql-value-f32 = []
+sql-value-f64 = []
+sql-value-string = []
 
 [dependencies]
-metafor = "^0.1.0"
 r2d2 = { version = "^0.8.9", optional = true }
 rocket_contrib = { version = "^0.4.6", optional = true, features = ["databases"] }
 worm-macros = { path = "../worm-macros" }
