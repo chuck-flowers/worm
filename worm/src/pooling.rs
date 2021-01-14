@@ -34,7 +34,7 @@ impl<E> ManageConnection for ConnectionManager<E>
 where
     E: SqlExecutor + Send + 'static,
 {
-    type Connection = Connection;
+    type Connection = Connection<E>;
 
     type Error = WormError;
 
