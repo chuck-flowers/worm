@@ -1,4 +1,5 @@
 use std::error::Error;
+use worm::errors::RowConversionError;
 use worm::executors::SqlExecutor;
 use worm::sql::SqlResult;
 use worm::sql::SqlRow;
@@ -12,19 +13,35 @@ struct DbAccount {
 }
 
 impl SqlResult for DbAccount {
-    fn from_row(row: SqlRow) -> Self
+    fn from_row(row: SqlRow) -> Result<Self, RowConversionError>
     where
         Self: Sized,
     {
-        use ::worm::sql::RecordField;
         let mut values = row.into_iter();
-        let handle = String::from_sql(values.next().unwrap()).unwrap();
-        let display_name = String::from_sql(values.next().unwrap()).unwrap();
 
-        Self {
+        use ::worm::sql::RecordField;
+        let handle = match values.next() {
+            Some(value) => String::from_sql(value)?,
+            None => {
+                return Err(RowConversionError::MissingFieldValue {
+                    field_name: "handle",
+                })
+            }
+        };
+
+        let display_name = match values.next() {
+            Some(value) => String::from_sql(value)?,
+            None => {
+                return Err(RowConversionError::MissingFieldValue {
+                    field_name: "display_name",
+                })
+            }
+        };
+
+        Ok(Self {
             handle,
             display_name,
-        }
+        })
     }
 }
 

@@ -32,8 +32,11 @@ where
 {
     type Item = Result<T, RowConversionError>;
     fn next(&mut self) -> Option<Self::Item> {
-        self.row_iter
-            .next()
-            .map(|res| res.map(T::from_row).map_err(RowConversionError::from))
+        let row_result = self.row_iter.next()?;
+        let struct_result = row_result
+            .and_then(T::from_row)
+            .map_err(RowConversionError::from);
+
+        Some(struct_result)
     }
 }

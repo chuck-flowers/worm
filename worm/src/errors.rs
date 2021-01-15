@@ -136,6 +136,11 @@ pub enum RowConversionError {
     /// An error that occurrs while converting the DBMS specific row
     /// representation into an abstract Worm representation.
     RawRowConversionFailure(RawRowConversionError),
+    /// Occurs when an additional field value was expected within the row.
+    MissingFieldValue {
+        /// The field name for which the value was missing.
+        field_name: &'static str,
+    },
     /// An error that occurs while converting a field's [SqlValue] into a
     /// concrete Rust type.
     FieldConversionError(FieldConversionError),
@@ -145,6 +150,9 @@ impl Display for RowConversionError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             RowConversionError::RawRowConversionFailure(raw_err) => raw_err.fmt(f),
+            RowConversionError::MissingFieldValue { field_name } => {
+                write!(f, "There was no value for the field '{}'", field_name)
+            }
             RowConversionError::FieldConversionError(field_err) => field_err.fmt(f),
         }
     }
@@ -154,6 +162,7 @@ impl Error for RowConversionError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             RowConversionError::RawRowConversionFailure(raw_err) => Some(raw_err),
+            RowConversionError::MissingFieldValue { .. } => None,
             RowConversionError::FieldConversionError(field_err) => Some(field_err),
         }
     }
