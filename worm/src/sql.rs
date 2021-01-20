@@ -8,6 +8,7 @@ pub use self::fields::RecordField;
 pub use self::rows::SqlRow;
 pub use self::values::SqlValue;
 use crate::errors::RowConversionError;
+pub use worm_macros::SqlResult;
 
 /// A type that can be returned by a SQL query.
 pub trait SqlResult {

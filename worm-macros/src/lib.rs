@@ -139,3 +139,59 @@ fn find_field<'a>(tagged_struct: &'a DataStruct, name: &str) -> Option<&'a Field
         field_ident.map(|i| i == name).unwrap_or(false)
     })
 }
+
+#[proc_macro_derive(SqlResult)]
+pub fn derive_script_result(tagged: TokenStream) -> TokenStream {
+    let tagged = parse_macro_input!(tagged as DeriveInput);
+    impl_derive_script_result(tagged).into()
+}
+
+fn impl_derive_script_result(tagged: DeriveInput) -> TokenStream2 {
+    if let Data::Struct(tagged_struct) = tagged.data {
+        let type_name = &tagged.ident;
+        impl_derive_script_result_struct(type_name, &tagged_struct)
+    } else {
+        let message = "SqlResult can only be derived for a struct";
+        let error = syn::Error::new_spanned(tagged, message);
+        error.to_compile_error()
+    }
+}
+
+fn impl_derive_script_result_struct(type_name: &Ident, tagged_struct: &DataStruct) -> TokenStream2 {
+    let field_extractors = build_row_field_extractors(tagged_struct);
+
+    quote! {
+        impl ::worm::sql::SqlResult for #type_name {
+            fn from_row(row: ::worm::sql::SqlRow) -> ::core::result::Result<Self, ::worm::errors::RowConversionError> {
+                let mut values = row.into_iter();
+                use ::worm::sql::RecordField;
+
+                #(#field_extractors)*
+
+                todo!()
+            }
+        }
+    }
+}
+
+fn build_row_field_extractors(
+    tagged_struct: &DataStruct,
+) -> impl Iterator<Item = TokenStream2> + '_ {
+    tagged_struct.fields.iter().map(|field| {
+        let ident = build_ident_for_field(field);
+        quote! {
+            let #ident = match values.next() {
+                Some(value) => String::from_sql(value)?,
+                None => {
+                    return Err(::worm::errors::RowConversionError::MissingFieldValue {
+                        field_name: "handle",
+                    })
+                }
+            };
+        }
+    })
+}
+
+fn build_ident_for_field(field: &Field) -> &Ident {
+    field.ident.as_ref().unwrap()
+}

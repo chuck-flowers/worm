@@ -1,48 +1,13 @@
 use std::error::Error;
-use worm::errors::RowConversionError;
 use worm::executors::SqlExecutor;
 use worm::sql::SqlResult;
-use worm::sql::SqlRow;
 use worm::Script;
 use worm_postgres::PostgresExecutor;
 
-#[derive(Debug)]
+#[derive(Debug, SqlResult)]
 struct DbAccount {
     handle: String,
     display_name: String,
-}
-
-impl SqlResult for DbAccount {
-    fn from_row(row: SqlRow) -> Result<Self, RowConversionError>
-    where
-        Self: Sized,
-    {
-        let mut values = row.into_iter();
-
-        use ::worm::sql::RecordField;
-        let handle = match values.next() {
-            Some(value) => String::from_sql(value)?,
-            None => {
-                return Err(RowConversionError::MissingFieldValue {
-                    field_name: "handle",
-                })
-            }
-        };
-
-        let display_name = match values.next() {
-            Some(value) => String::from_sql(value)?,
-            None => {
-                return Err(RowConversionError::MissingFieldValue {
-                    field_name: "display_name",
-                })
-            }
-        };
-
-        Ok(Self {
-            handle,
-            display_name,
-        })
-    }
 }
 
 #[derive(Clone, Script)]
