@@ -85,7 +85,7 @@ impl SqlExecutor for PostgresExecutor {
 
     fn execute_sql<'a>(&'a mut self, sql: &str) -> Result<ResultIter<'a>, SqlExecutionError> {
         let client = &mut self.0;
-        let pg_row_iter = match client.query_raw(sql, core::iter::empty()) {
+        let pg_row_iter = match client.query_raw::<_, bool, _>(sql, core::iter::empty()) {
             Ok(row_iter) => row_iter,
             Err(err) => return Err(SqlExecutionError::Other { err: Box::new(err) }),
         };
